@@ -9,6 +9,7 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
+import Header from '../components/Header';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -31,11 +32,19 @@ export default function Login() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      // Redirect based on user role
-      if (user.role === 'admin') {
-        navigate('/admin');
+      // Check if there's a saved redirect URL
+      const redirectUrl = localStorage.getItem('redirectAfterLogin');
+
+      if (redirectUrl) {
+        localStorage.removeItem('redirectAfterLogin');
+        navigate(redirectUrl);
       } else {
-        navigate('/projects');
+        // Redirect based on user role
+        if (user.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/projects');
+        }
       }
     }
   }, [isAuthenticated, user, navigate]);
@@ -66,8 +75,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <Card className="w-full max-w-md">
+    <>
+      <Header />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 pt-20">
+        <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">Welcome Back</CardTitle>
           <CardDescription className="text-center">
@@ -123,6 +134,7 @@ export default function Login() {
           </CardFooter>
         </form>
       </Card>
-    </div>
+      </div>
+    </>
   );
 }

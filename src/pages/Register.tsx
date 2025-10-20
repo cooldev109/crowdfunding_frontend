@@ -9,6 +9,7 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
+import Header from '../components/Header';
 
 const registerSchema = z.object({
   name: z
@@ -78,8 +79,10 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
-      <Card className="w-full max-w-md">
+    <>
+      <Header />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8 pt-20">
+        <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
           <CardDescription className="text-center">
@@ -177,6 +180,7 @@ export default function Register() {
           </CardFooter>
         </form>
       </Card>
-    </div>
+      </div>
+    </>
   );
 }

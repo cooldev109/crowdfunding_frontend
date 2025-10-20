@@ -88,6 +88,8 @@ export default function PremiumDatabase() {
   useEffect(() => {
     if (!isAuthenticated) {
       toast.error("Please login to access Premium Database");
+      // Save the current URL to redirect back after login
+      localStorage.setItem('redirectAfterLogin', '/premium-database');
       navigate("/login");
       return;
     }
