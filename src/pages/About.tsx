@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Shield, Target, Award, Users, TrendingUp, Globe, CheckCircle2 } from "lucide-react";
+import { Shield, Target, Award, Users, TrendingUp, Globe, CheckCircle2, Linkedin, Mail, Phone } from "lucide-react";
 import teamImage from "@/assets/team.jpg";
 
 const values = [
@@ -43,21 +43,37 @@ const teamMembers = [
     name: "Sarah Mitchell",
     role: "CEO & Founder",
     description: "15+ years in investment banking and venture capital",
+    education: "MBA, Wharton School of Business",
+    specialties: ["Strategic Planning", "Venture Capital", "M&A"],
+    email: "sarah.mitchell@investflow.com",
+    linkedin: "#",
   },
   {
     name: "David Chen",
-    role: "CTO",
+    role: "Chief Technology Officer",
     description: "Former tech lead at major fintech companies",
+    education: "MS Computer Science, Stanford",
+    specialties: ["Fintech", "AI/ML", "Platform Architecture"],
+    email: "david.chen@investflow.com",
+    linkedin: "#",
   },
   {
     name: "Emily Rodriguez",
     role: "Head of Investments",
     description: "MBA from Harvard, 12+ years in portfolio management",
+    education: "MBA, Harvard Business School",
+    specialties: ["Portfolio Management", "Risk Analysis", "Due Diligence"],
+    email: "emily.rodriguez@investflow.com",
+    linkedin: "#",
   },
   {
     name: "Michael Thompson",
     role: "Chief Risk Officer",
     description: "Expert in financial risk assessment and compliance",
+    education: "CFA, Chartered Financial Analyst",
+    specialties: ["Risk Management", "Compliance", "Financial Regulation"],
+    email: "michael.thompson@investflow.com",
+    linkedin: "#",
   },
 ];
 
@@ -213,33 +229,134 @@ const About = () => {
           </div>
         </section>
 
-        {/* Team Section */}
-        <section className="py-16">
+        {/* Team Section - Professional Consultant Style */}
+        <section className="py-20 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-background">
           <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground text-center mb-4">
-                Meet Our Leadership Team
-              </h2>
-              <p className="text-lg text-muted-foreground text-center mb-12 max-w-3xl mx-auto">
-                Our team brings decades of combined experience in finance, technology, and investment management
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="max-w-7xl mx-auto">
+              {/* Section Header */}
+              <div className="text-center mb-16">
+                <div className="inline-flex items-center justify-center px-4 py-2 mb-4 rounded-full bg-primary/10 border border-primary/20">
+                  <Users className="w-4 h-4 text-primary mr-2" />
+                  <span className="text-sm font-semibold text-primary">Expert Leadership</span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-4">
+                  Meet Our Leadership Team
+                </h2>
+                <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                  Backed by decades of combined experience in finance, technology, and investment management
+                </p>
+              </div>
+
+              {/* Team Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
                 {teamMembers.map((member, index) => (
                   <div
                     key={index}
-                    className="bg-card rounded-xl p-6 shadow-card border border-border text-center hover:shadow-hover transition-all duration-300 animate-fade-in"
-                    style={{ animationDelay: `${index * 100}ms` }}
+                    className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700 hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 animate-fade-in"
+                    style={{ animationDelay: `${index * 150}ms` }}
                   >
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4 flex items-center justify-center">
-                      <Users className="text-white" size={32} />
+                    <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/10 p-8">
+                      {/* Decorative Elements */}
+                      <div className="absolute -right-12 -top-12 w-32 h-32 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
+                      <div className="absolute -left-8 -bottom-8 w-24 h-24 bg-gradient-to-tr from-secondary/20 to-primary/20 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
+
+                      <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                        {/* Avatar */}
+                        <div className="relative flex-shrink-0">
+                          <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary via-secondary to-primary p-1 shadow-xl group-hover:shadow-2xl transition-shadow">
+                            <div className="w-full h-full rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center">
+                              <div className="text-4xl font-bold bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent">
+                                {member.name.split(' ').map(n => n[0]).join('')}
+                              </div>
+                            </div>
+                          </div>
+                          {/* Online Status Indicator */}
+                          <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white dark:border-slate-800 shadow-md"></div>
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 text-center sm:text-left">
+                          <h3 className="text-2xl font-display font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
+                            {member.name}
+                          </h3>
+                          <p className="text-sm font-semibold text-primary mb-2 uppercase tracking-wide">
+                            {member.role}
+                          </p>
+                          <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
+                            {member.description}
+                          </p>
+                          <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-muted-foreground">
+                            <Award className="w-4 h-4 text-secondary" />
+                            <span>{member.education}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <h3 className="text-lg font-display font-semibold text-foreground mb-1">
-                      {member.name}
-                    </h3>
-                    <p className="text-sm text-primary font-medium mb-3">{member.role}</p>
-                    <p className="text-sm text-muted-foreground">{member.description}</p>
+
+                    {/* Details Section */}
+                    <div className="p-6 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-700">
+                      {/* Specialties */}
+                      <div className="mb-4">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-2">
+                          <TrendingUp className="w-3.5 h-3.5" />
+                          Specialties
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {member.specialties.map((specialty, idx) => (
+                            <span
+                              key={idx}
+                              className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                            >
+                              {specialty}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Contact Actions */}
+                      <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                        <a
+                          href={`mailto:${member.email}`}
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-medium text-sm transition-all group/btn"
+                        >
+                          <Mail className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                          <span className="hidden sm:inline">Email</span>
+                        </a>
+                        <a
+                          href={member.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-100 dark:hover:bg-blue-950/50 text-blue-600 dark:text-blue-400 font-medium text-sm transition-all group/btn"
+                        >
+                          <Linkedin className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                          <span className="hidden sm:inline">LinkedIn</span>
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 ))}
+              </div>
+
+              {/* Call to Action */}
+              <div className="mt-16 text-center">
+                <div className="inline-flex flex-col items-center gap-4 p-8 rounded-2xl bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/10 border border-primary/10">
+                  <Phone className="w-12 h-12 text-primary" />
+                  <div>
+                    <h3 className="text-xl font-semibold text-foreground mb-2">
+                      Want to speak with our team?
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Schedule a consultation to discuss your investment goals
+                    </p>
+                    <a
+                      href="/contact"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary hover:bg-primary/90 text-white font-semibold transition-all hover:scale-105 shadow-lg hover:shadow-xl"
+                    >
+                      <Mail className="w-4 h-4" />
+                      Contact Us
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

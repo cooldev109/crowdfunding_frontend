@@ -37,9 +37,18 @@ api.interceptors.response.use(
 
       // Handle unauthorized
       if (error.response.status === 401) {
-        // Clear token and redirect to login
+        // Clear invalid token
         localStorage.removeItem('token');
-        window.location.href = '/login';
+
+        // Only redirect to login if not on a public page
+        const publicPages = ['/premium-database', '/', '/pricing'];
+        const currentPath = window.location.pathname;
+        const isPublicPage = publicPages.some(page => currentPath.startsWith(page));
+
+        if (!isPublicPage && !currentPath.includes('/login') && !currentPath.includes('/register')) {
+          // Redirect to login for protected pages
+          window.location.href = '/login';
+        }
       }
 
       return Promise.reject({

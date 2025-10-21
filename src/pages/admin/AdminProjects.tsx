@@ -16,6 +16,8 @@ import {
   FolderKanban,
   LayoutGrid,
   Table,
+  Crown,
+  Zap,
 } from 'lucide-react';
 import api from '../../lib/api';
 import { toast } from 'sonner';
@@ -39,7 +41,8 @@ const AdminProjects = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
+  const [filterPremium, setFilterPremium] = useState<string>('all'); // 'all', 'premium', 'free'
+  const [viewMode, setViewMode] = useState<'card' | 'table'>('table');
 
   useEffect(() => {
     fetchProjects();
@@ -48,7 +51,7 @@ const AdminProjects = () => {
   const fetchProjects = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get('/projects', {
+      const response = await api.get('/projects/admin/all', {
         params: {
           limit: 100,
         },
@@ -101,7 +104,11 @@ const AdminProjects = () => {
       project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.category.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = filterStatus === 'all' || project.status === filterStatus;
-    return matchesSearch && matchesStatus;
+    const matchesPremium =
+      filterPremium === 'all' ||
+      (filterPremium === 'premium' && project.isPremium) ||
+      (filterPremium === 'free' && !project.isPremium);
+    return matchesSearch && matchesStatus && matchesPremium;
   });
 
   return (
@@ -166,6 +173,31 @@ const AdminProjects = () => {
                     {status.label}
                   </Button>
                 ))}
+
+                {/* Premium/Free Filter */}
+                <div className="h-8 w-px bg-purple-200 mx-1" />
+                {[
+                  { key: 'all', label: 'All', icon: null },
+                  { key: 'premium', label: 'Premium', icon: Crown },
+                  { key: 'free', label: 'Free', icon: Zap },
+                ].map((filter) => (
+                  <Button
+                    key={filter.key}
+                    variant={filterPremium === filter.key ? 'default' : 'outline'}
+                    onClick={() => setFilterPremium(filter.key)}
+                    size="sm"
+                    className={`capitalize font-semibold px-3 md:px-5 text-xs md:text-sm rounded-lg md:rounded-xl transition-all duration-300 ${
+                      filterPremium === filter.key
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg text-white'
+                        : 'border-2 border-amber-200 hover:border-amber-300 hover:bg-amber-50 text-amber-700'
+                    }`}
+                  >
+                    {filter.icon && <filter.icon size={14} className="mr-1.5" />}
+                    {filter.label}
+                  </Button>
+                ))}
+
+                {/* View Mode Toggle */}
                 <div className="h-8 w-px bg-purple-200 mx-1" />
                 <div className="flex gap-1 bg-purple-50 p-1 rounded-lg border-2 border-purple-200">
                   <Button

@@ -86,13 +86,6 @@ export default function PremiumDatabase() {
   const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      toast.error("Please login to access Premium Database");
-      // Save the current URL to redirect back after login
-      localStorage.setItem('redirectAfterLogin', '/premium-database');
-      navigate("/login");
-      return;
-    }
     fetchCategories();
     handleSearch();
   }, [isAuthenticated]);
@@ -224,9 +217,11 @@ export default function PremiumDatabase() {
                 </p>
               </div>
             </div>
-            <Badge variant="secondary" className="mt-2">
-              Your Plan: {user?.planKey?.toUpperCase() || "FREE"}
-            </Badge>
+            {isAuthenticated && (
+              <Badge variant="secondary" className="mt-2">
+                Your Plan: {user?.planKey?.toUpperCase() || "FREE"}
+              </Badge>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -456,70 +451,96 @@ export default function PremiumDatabase() {
                   {projects.map((project) => (
                     <Card
                       key={project._id}
-                      className="hover:shadow-lg transition-shadow cursor-pointer"
-                      onClick={() => navigate(`/projects/${project._id}`)}
+                      className="hover:shadow-lg transition-shadow cursor-pointer relative overflow-hidden"
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          // Show modal or redirect to register when unregistered user clicks
+                          const shouldRegister = window.confirm(
+                            `"${project.title}" is a premium project.\n\nPlease register or login to view full project details and investment information.\n\nClick OK to register now, or Cancel to login.`
+                          );
+                          if (shouldRegister) {
+                            navigate("/register");
+                          } else {
+                            navigate("/login");
+                          }
+                        } else {
+                          navigate(`/projects/${project._id}`);
+                        }
+                      }}
                     >
                       <CardContent className="p-4 sm:p-6">
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                          <div className="w-full sm:w-20 md:w-24 h-32 sm:h-20 md:h-24 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex-shrink-0 overflow-hidden">
-                            <img
-                              src={project.imageUrl || `https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=200&h=200&fit=crop&auto=format&q=80`}
-                              alt={project.title}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.currentTarget.src = `https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=200&h=200&fit=crop&auto=format&q=80`;
-                              }}
-                            />
+                        {!isAuthenticated ? (
+                          /* Locked View - Only Title */
+                          <div className="flex items-center justify-between gap-3">
+                            <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2 flex-1 min-w-0">
+                              <Crown className="h-5 w-5 text-amber-500 flex-shrink-0" />
+                              <span className="truncate">{project.title}</span>
+                            </h3>
+                            <Lock className="h-5 w-5 text-gray-400 flex-shrink-0" />
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2 mb-2">
-                              <div className="flex-1 min-w-0">
-                                <h3 className="text-base sm:text-lg font-semibold mb-1 truncate">
-                                  {project.title}
-                                </h3>
-                                <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
-                                  {project.description}
-                                </p>
-                              </div>
-                              <Badge
-                                variant={
-                                  project.status === "active"
-                                    ? "default"
-                                    : "secondary"
-                                }
-                                className="flex-shrink-0 text-xs"
-                              >
-                                {project.status}
-                              </Badge>
+                        ) : (
+                          /* Full View - Authenticated Users */
+                          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                            <div className="w-full sm:w-20 md:w-24 h-32 sm:h-20 md:h-24 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex-shrink-0 overflow-hidden">
+                              <img
+                                src={project.imageUrl || `https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=200&h=200&fit=crop&auto=format&q=80`}
+                                alt={project.title}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.src = `https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=200&h=200&fit=crop&auto=format&q=80`;
+                                }}
+                              />
                             </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mt-3 sm:mt-4">
-                              <div>
-                                <p className="text-xs text-gray-500">ROI</p>
-                                <p className="font-semibold text-sm text-green-600">
-                                  {project.roiPercent}%
-                                </p>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2 mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="text-base sm:text-lg font-semibold mb-1 truncate">
+                                    {project.title}
+                                  </h3>
+                                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
+                                    {project.description}
+                                  </p>
+                                </div>
+                                <Badge
+                                  variant={
+                                    project.status === "active"
+                                      ? "default"
+                                      : "secondary"
+                                  }
+                                  className="flex-shrink-0 text-xs"
+                                >
+                                  {project.status}
+                                </Badge>
                               </div>
-                              <div>
-                                <p className="text-xs text-gray-500">Target</p>
-                                <p className="font-semibold text-sm truncate">
-                                  {formatCurrency(project.targetAmount)}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-xs text-gray-500">Funded</p>
-                                <p className="font-semibold text-sm truncate">
-                                  {formatCurrency(project.fundedAmount)}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-xs text-gray-500">Duration</p>
-                                <p className="font-semibold text-sm">
-                                  {project.durationMonths}mo
-                                </p>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mt-3 sm:mt-4">
+                                <div>
+                                  <p className="text-xs text-gray-500">ROI</p>
+                                  <p className="font-semibold text-sm text-green-600">
+                                    {project.roiPercent}%
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-gray-500">Target</p>
+                                  <p className="font-semibold text-sm truncate">
+                                    {formatCurrency(project.targetAmount)}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-gray-500">Funded</p>
+                                  <p className="font-semibold text-sm truncate">
+                                    {formatCurrency(project.fundedAmount)}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-gray-500">Duration</p>
+                                  <p className="font-semibold text-sm">
+                                    {project.durationMonths}mo
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
+                        )}
                       </CardContent>
                     </Card>
                   ))}
