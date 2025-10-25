@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { Elements } from '@stripe/react-stripe-js';
+import { getStripe } from '../lib/stripe';
 import api from '../lib/api';
+import StripePaymentForm from './StripePaymentForm';
 import {
   Dialog,
   DialogContent,
@@ -21,7 +24,7 @@ import {
   SelectValue,
 } from './ui/select';
 import { toast } from 'sonner';
-import { DollarSign, TrendingUp, Calendar } from 'lucide-react';
+import { DollarSign, TrendingUp, Calendar, Loader2 } from 'lucide-react';
 
 interface InvestmentModalProps {
   open: boolean;
@@ -34,6 +37,7 @@ interface InvestmentModalProps {
     targetAmount: number;
     fundedAmount: number;
     durationMonths: number;
+    status?: string;
   };
   onSuccess?: () => void;
 }
@@ -47,8 +51,13 @@ export default function InvestmentModal({
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const [amount, setAmount] = useState(project.minInvestment.toString());
-  const [paymentMethod, setPaymentMethod] = useState<string>('');
+  const [paymentMethod, setPaymentMethod] = useState<string>('stripe');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Stripe payment state
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [investmentId, setInvestmentId] = useState<string | null>(null);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -99,20 +108,28 @@ export default function InvestmentModal({
         paymentMethod,
       });
 
-      toast.success('Investment successful!');
-      onClose();
+      // If payment method is Stripe, show payment form
+      if (paymentMethod === 'stripe') {
+        const { investment, paymentIntent } = response.data.data;
 
-      // Call success callback to refresh project data
-      if (onSuccess) {
-        onSuccess();
-      }
+        if (paymentIntent?.clientSecret) {
+          setClientSecret(paymentIntent.clientSecret);
+          setInvestmentId(investment._id);
+          setShowPaymentForm(true);
+          toast.info('Please complete the payment to confirm your investment');
+        } else {
+          throw new Error('No payment intent received from server');
+        }
+      } else {
+        // For other payment methods (not implemented yet)
+        toast.success('Investment created! Complete payment to confirm.');
+        onClose();
 
-      // Navigate to investment details or my investments
-      if (response.data.data.investment._id) {
-        toast.info('Redirecting to your investments...');
-        setTimeout(() => {
-          navigate('/my-investments');
-        }, 1500);
+        if (onSuccess) {
+          onSuccess();
+        }
+
+        navigate('/my-investments');
       }
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Investment failed';
@@ -122,6 +139,78 @@ export default function InvestmentModal({
     }
   };
 
+  const handlePaymentSuccess = () => {
+    toast.success('Payment successful! Your investment is confirmed.');
+    setShowPaymentForm(false);
+    setClientSecret(null);
+    onClose();
+
+    if (onSuccess) {
+      onSuccess();
+    }
+
+    // Navigate to investments page
+    setTimeout(() => {
+      navigate('/my-investments');
+    }, 1000);
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPaymentForm(false);
+    setClientSecret(null);
+    toast.info('Payment cancelled. You can try again.');
+  };
+
+  // Show Stripe payment form if client secret is available
+  if (showPaymentForm && clientSecret) {
+    const stripePromise = getStripe();
+
+    if (!stripePromise) {
+      toast.error('Stripe is not configured properly. Please contact support.');
+      setShowPaymentForm(false);
+      return null;
+    }
+
+    return (
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Complete Your Investment</DialogTitle>
+            <DialogDescription>
+              Securely complete your payment to confirm your investment in {project.title}
+            </DialogDescription>
+          </DialogHeader>
+
+          <Elements
+            stripe={stripePromise}
+            options={{
+              clientSecret,
+              appearance: {
+                theme: 'stripe',
+                variables: {
+                  colorPrimary: '#2563eb',
+                  colorBackground: '#ffffff',
+                  colorText: '#1f2937',
+                  colorDanger: '#ef4444',
+                  fontFamily: 'system-ui, sans-serif',
+                  borderRadius: '8px',
+                },
+              },
+            }}
+          >
+            <StripePaymentForm
+              amount={investmentAmount}
+              projectTitle={project.title}
+              onSuccess={handlePaymentSuccess}
+              onCancel={handlePaymentCancel}
+            />
+          </Elements>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Show investment details form (original modal)
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
@@ -131,6 +220,27 @@ export default function InvestmentModal({
             Enter your investment amount and payment details
           </DialogDescription>
         </DialogHeader>
+
+        {/* Funded Notice */}
+        {project.status === 'funded' && (
+          <div className="bg-purple-50 border-l-4 border-purple-400 p-4 rounded">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-purple-800 font-medium">
+                  ✅ This project is fully funded
+                </p>
+                <p className="text-xs text-purple-700 mt-1">
+                  The funding target has been reached. No additional investments are accepted.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Investment Amount */}
@@ -164,12 +274,15 @@ export default function InvestmentModal({
                 <SelectValue placeholder="Select payment method" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="stripe">Credit/Debit Card (Stripe)</SelectItem>
-                <SelectItem value="paypal">PayPal</SelectItem>
-                <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                <SelectItem value="wallet">Digital Wallet</SelectItem>
+                <SelectItem value="stripe">
+                  💳 Credit/Debit Card (Stripe) - Recommended
+                </SelectItem>
+                {/* Other payment methods coming soon */}
               </SelectContent>
             </Select>
+            <p className="text-xs text-gray-500">
+              Secure payment processing powered by Stripe
+            </p>
           </div>
 
           {/* Investment Summary */}
@@ -227,8 +340,15 @@ export default function InvestmentModal({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Processing...' : `Invest ${formatCurrency(investmentAmount)}`}
+            <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                `Continue to Payment →`
+              )}
             </Button>
           </DialogFooter>
         </form>

@@ -29,8 +29,6 @@ interface Plan {
 interface PlansResponse {
   plans: {
     free: Plan;
-    basic: Plan;
-    plus: Plan;
     premium: Plan;
   };
 }
@@ -121,18 +119,17 @@ const Pricing = () => {
           {/* Header Section */}
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Choose Your Investment Plan
+              Simple, Transparent Pricing
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Select the perfect plan to unlock powerful investment opportunities
-              and analytics
+              Start free and upgrade to Premium for unlimited access to all features and exclusive projects
             </p>
           </div>
 
           {/* Plans Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {plans && Object.entries(plans).map(([key, plan]) => {
-              const isPopular = key === "plus";
+              const isPopular = key === "premium";
               const isCurrent = user?.planKey === key && user?.planStatus === "active";
 
               return (
@@ -147,7 +144,7 @@ const Pricing = () => {
                   {isPopular && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                       <span className="bg-gradient-to-r from-primary to-secondary text-white px-4 py-1 rounded-full text-sm font-semibold">
-                        Most Popular
+                        Recommended
                       </span>
                     </div>
                   )}

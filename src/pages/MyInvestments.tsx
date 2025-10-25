@@ -58,6 +58,8 @@ interface Investment {
     imageUrl?: string;
     status: string;
     category: string;
+    startDate?: string;
+    endDate?: string;
   };
   createdAt: string;
 }
@@ -149,6 +151,17 @@ export default function MyInvestments() {
       completed: 'bg-green-500',
       failed: 'bg-red-500',
       refunded: 'bg-gray-500',
+    };
+
+    return <Badge className={styles[status] || 'bg-gray-400'}>{status}</Badge>;
+  };
+
+  const getProjectStatusBadge = (status: string) => {
+    const styles: Record<string, string> = {
+      active: 'bg-green-500',
+      pending: 'bg-yellow-500',
+      completed: 'bg-blue-500',
+      closed: 'bg-gray-500',
     };
 
     return <Badge className={styles[status] || 'bg-gray-400'}>{status}</Badge>;
@@ -256,8 +269,9 @@ export default function MyInvestments() {
                         <TableHead>Project</TableHead>
                         <TableHead>Amount</TableHead>
                         <TableHead>Expected Return</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>Investment Date</TableHead>
+                        <TableHead>Investment Status</TableHead>
+                        <TableHead>Project Status</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -289,6 +303,7 @@ export default function MyInvestments() {
                           </TableCell>
                           <TableCell>{formatDate(investment.investmentDate)}</TableCell>
                           <TableCell>{getStatusBadge(investment.status)}</TableCell>
+                          <TableCell>{getProjectStatusBadge(investment.projectId.status)}</TableCell>
                           <TableCell>
                             <div className="flex gap-2">
                               <Button

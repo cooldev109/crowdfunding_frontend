@@ -26,7 +26,7 @@ interface Project {
   _id: string;
   title: string;
   category: string;
-  status: 'active' | 'completed' | 'closed';
+  status: 'active' | 'pending' | 'completed' | 'closed';
   targetAmount: number;
   fundedAmount: number;
   roiPercent: number;
@@ -34,6 +34,8 @@ interface Project {
   durationMonths: number;
   isPremium: boolean;
   createdAt: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 const AdminProjects = () => {
@@ -81,6 +83,8 @@ const AdminProjects = () => {
     switch (status) {
       case 'active':
         return 'bg-green-100 text-green-700 border-green-200';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
       case 'completed':
         return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'closed':
@@ -156,6 +160,7 @@ const AdminProjects = () => {
                 {[
                   { key: 'all', label: 'All' },
                   { key: 'active', label: 'Active' },
+                  { key: 'pending', label: 'Pending' },
                   { key: 'completed', label: 'Completed' },
                   { key: 'closed', label: 'Closed' },
                 ].map((status) => (

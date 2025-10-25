@@ -19,10 +19,11 @@ interface Project {
   targetAmount: number;
   fundedAmount: number;
   durationMonths: number;
-  status: 'active' | 'completed' | 'closed';
+  status: 'active' | 'pending' | 'completed' | 'closed';
   imageUrl?: string;
   createdAt: string;
   startDate?: string;
+  endDate?: string;
   createdBy?: {
     name: string;
     email: string;
@@ -75,6 +76,8 @@ export default function ProjectDetail() {
     switch (status) {
       case 'active':
         return 'bg-green-500';
+      case 'pending':
+        return 'bg-yellow-500';
       case 'completed':
         return 'bg-blue-500';
       case 'closed':
@@ -210,6 +213,42 @@ export default function ProjectDetail() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Project Timeline */}
+            {(project.startDate || project.endDate) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    Project Timeline
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {project.startDate && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Start Date</span>
+                      <span className="font-semibold">{formatDate(project.startDate)}</span>
+                    </div>
+                  )}
+                  {project.endDate && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">End Date</span>
+                      <span className="font-semibold">{formatDate(project.endDate)}</span>
+                    </div>
+                  )}
+                  {project.startDate && project.endDate && (
+                    <div className="pt-2 border-t">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Status</span>
+                        <Badge className={getStatusColor(project.status)}>
+                          {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                        </Badge>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -248,7 +287,10 @@ export default function ProjectDetail() {
                   disabled={project.status !== 'active'}
                   onClick={() => setIsInvestmentModalOpen(true)}
                 >
-                  {project.status === 'active' ? 'Invest Now' : 'Not Available'}
+                  {project.status === 'active' ? 'Invest Now' :
+                   project.status === 'pending' ? 'Investment in Progress' :
+                   project.status === 'completed' ? 'Project Completed' :
+                   'Not Available'}
                 </Button>
               </CardContent>
             </Card>

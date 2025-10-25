@@ -14,7 +14,7 @@ interface Project {
   targetAmount: number;
   fundedAmount: number;
   durationMonths: number;
-  status: 'active' | 'completed' | 'closed';
+  status: 'active' | 'funded' | 'completed' | 'closed';
   imageUrl?: string;
   createdAt: string;
 }
@@ -30,6 +30,8 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     switch (status) {
       case 'active':
         return 'bg-green-500';
+      case 'funded':
+        return 'bg-purple-500';
       case 'completed':
         return 'bg-blue-500';
       case 'closed':
@@ -59,7 +61,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <Badge className={`absolute top-2 right-2 ${getStatusColor(project.status)} shadow-sm text-white text-xs font-medium`}>
-          {project.status}
+          {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
         </Badge>
       </div>
 
